@@ -108,7 +108,7 @@ describe('refuseCopyleft: what an app sold under its own license beside its open
   });
 });
 
-describe('the fresh review of 2026-11-19: notices a bundle could ship without', () => {
+describe('the code review of 2026-11-19: notices a bundle could ship without', () => {
   it('pastes a license text as it is: "$&", "$`" and "$$" in a notice stay text, not replacement commands', () => {
     const root = store.install('dollars', '1.0.0', {LICENSE: 'Price: $$5 and pattern $` here, $& and $<'});
     const plugin = licensesPage({siteUrl: 'https://globe.hubnx.com'});

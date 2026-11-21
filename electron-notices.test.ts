@@ -34,12 +34,13 @@ function buildList(build: string, packages: ShippedPackage[]): void {
 const windowPackage: ShippedPackage = {name: 'ui-lib', version: '2.0.0', license: 'MIT', notices: ['MIT, ui-lib']};
 
 describe('noticesCollector: one build’s packages, for the merge', () => {
-  it('writes the packages the build read, with their notices, to <folder>/<build>.json', () => {
+  it('writes the packages the build read, with their notices, to <folder>/<build>.json once the bundle is written (never for a failed build)', () => {
     const root = store.install('ui-lib', '2.0.0', {LICENSE: 'MIT, ui-lib'});
     const plugin = noticesCollector({build: 'window', folder: notices});
     plugin.buildStart();
     plugin.buildEnd.call(buildOf([join(root, 'index.js'), join(store.root, 'src', 'main.ts')]));
-    plugin.closeBundle();
+    expect(existsSync(join(notices, 'window.json'))).toBe(false);
+    plugin.writeBundle();
     const written = JSON.parse(readFileSync(join(notices, 'window.json'), 'utf8')) as ShippedPackage[];
     expect(written.map(item => [item.name, item.version, item.notices])).toEqual([['ui-lib', '2.0.0', ['MIT, ui-lib']]]);
   });
@@ -72,6 +73,20 @@ describe('electronAppNotices: one list for everything an Electron app ships', ()
     expect(extras.map(item => item.name)).toEqual(['Electron 45.2.1', 'Chromium, inside Electron 45.2.1']);
     expect(extras[0]?.text).toBe('Copyright (c) Electron contributors\nMIT');
     expect(extras[1]?.text).toContain('as LICENSES.chromium.html beside it, and are at https://example.com/licenses/chromium.html.');
+  });
+
+  it('reads an app folder given relative to the working folder', () => {
+    store.installFlat('updater', {license: 'MIT'}, {LICENSE: Mit});
+    app({updater: '1.0.0'});
+    buildList('window', []);
+    const before = process.cwd();
+    try {
+      process.chdir(join(store.root, '..'));
+      const relativeApp = store.root.split('/').at(-1) ?? '';
+      expect(electronAppNotices({appFolder: relativeApp, folder: notices, builds: ['window']}).packages.map(item => item.name)).toEqual(['updater']);
+    } finally {
+      process.chdir(before);
+    }
   });
 
   it('stops, naming the build, when a build’s list is missing: a build skipped or failed', () => {

@@ -9,7 +9,7 @@
 // the packed dependencies and Electron's and Chromium's notices. Lifted from hubnx Music's build, 2026-11-21.
 
 import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {join, resolve} from 'node:path';
 import {refuseCopyleft, shippedPackages, type ExtraNotice, type LicenseDecisions, type NoticesAtSource, type ShippedPackage} from './licenses.ts';
 
 /** The structural part of Vite's plugin types this needs, so this package needs no Vite of its own. */
@@ -22,7 +22,7 @@ export interface NoticesCollectorPlugin {
   apply: 'build';
   buildStart(): void;
   buildEnd(this: BuildContext): void;
-  closeBundle(): void;
+  writeBundle(): void;
 }
 
 export interface NoticesCollectorOptions {
@@ -41,7 +41,9 @@ export function noticesCollector({build, folder, atSource}: NoticesCollectorOpti
   return {
     name: 'hubnx-notices-collector',
     apply: 'build',
-    // A build that fails leaves no list behind, so the merge stops on it instead of reading the last run's.
+    // A build that fails leaves no list behind, so the merge stops on it instead of reading the last run's: the old
+    // list goes when the build starts, and the new one is written only once the bundle is (Vite runs closeBundle
+    // after a failed build too).
     buildStart() {
       rmSync(file, {force: true});
       read.clear();
@@ -49,7 +51,7 @@ export function noticesCollector({build, folder, atSource}: NoticesCollectorOpti
     buildEnd() {
       for (const id of this.getModuleIds()) read.add(id);
     },
-    closeBundle() {
+    writeBundle() {
       mkdirSync(folder, {recursive: true});
       writeFileSync(file, JSON.stringify(shippedPackages(read, {atSource}), null, 1));
     },
@@ -57,7 +59,7 @@ export function noticesCollector({build, folder, atSource}: NoticesCollectorOpti
 }
 
 export interface ElectronAppNoticesOptions {
-  /** The app's folder: its package.json and node_modules. */
+  /** The app's folder, its package.json and node_modules: absolute, or relative to the working folder. */
   appFolder: string;
   /** Where every build's collector wrote its list. */
   folder: string;
@@ -98,7 +100,9 @@ function merged(lists: readonly (readonly ShippedPackage[])[]): ShippedPackage[]
  * Electron without its license files: a build must not ship code whose notice it can't show.
  */
 export function electronAppNotices(options: ElectronAppNoticesOptions): ElectronAppNotices {
-  const {appFolder, folder, builds, alsoShipped = [], atSource, decisions, chromiumNoticesUrl} = options;
+  const {folder, builds, alsoShipped = [], atSource, decisions, chromiumNoticesUrl} = options;
+  // Absolute, since the installed packages' paths below are module ids, which shippedPackages reads from the app.
+  const appFolder = resolve(options.appFolder);
   const lists = builds.map(build => {
     const file = join(folder, `${build}.json`);
     if (!existsSync(file)) throw new Error(`electron-notices: no ${build}.json in ${folder}; run every build first (${builds.join(', ')})`);

@@ -11,9 +11,9 @@ them under the license; the feedback parts only work for Hub Nexus's apps (see [
 
 | Module | Runs | Does |
 |---|---|---|
-| `external-links` | at build time | Rewrites a page's links: one to another site, a plain file (`.txt`, `.pdf`) or an email opens in a new tab, with `rel="noopener"` and a note for screen readers. A link with `download` is left alone |
+| `external-links` | at build time | Rewrites a page's links: one to another site, a plain file (`.txt`, `.pdf`) or an email opens in a new tab, with `rel="noopener"`, and one to another site or a file gets a note for screen readers. A link with `download` is left alone |
 | `popup` | in the page | A `<dialog>` with one shape, closed by its × or the backdrop; helpers for `popover` panels; whether anything is over the page |
-| `email-chooser` · `mail-options` | in the page | An email link opens a chooser (Gmail, Outlook.com, Outlook at work, the mail app, copy the address) instead of a blank tab when no mail program is set up. Importing `email-chooser` installs it |
+| `email-chooser` · `mail-options` | in the page | An email link opens a chooser (Gmail, Outlook.com, Outlook at work, the mail app, copy the address) instead of the browser's mail program, which a fresh profile or a private window doesn't have. Importing `email-chooser` installs it |
 | `feedback-link` · `feedback-form` · `feedback-report` | in the page | The feedback form, alone or in a pop-up over any page with a picture of it, where the person boxes what they mean and blacks out anything private before it's sent. Sent to Hub Nexus's report route |
 | `licenses` | at build time | A website's open-source licenses page, made from the files the bundle actually read: a Vite plugin, and the plain functions for other bundlers |
 | `electron-notices` | at build time | The same for an Electron app: every Vite build's packages, the dependencies electron-builder packs, Electron's and Chromium's notices |
@@ -58,8 +58,8 @@ never from `node_modules` (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and t
 
 **3. Load the styles** from the app's stylesheet: `@import '@hubnx/web-parts/web-parts.css';`. They use these
 custom properties, which the app defines: `--surface`, `--surface-2`, `--ink`, `--muted`, `--line`, `--accent`,
-`--wrong`, `--radius`, `--shadow`. The app's own `.button` and `.segmented` style the buttons, and its
-`.visually-hidden` the screen-reader notes.
+`--wrong`, `--radius`, `--shadow`. The app's own `.button`, `.button-primary` and `.segmented` style the buttons,
+`.muted` the quieter words, and `.visually-hidden` the screen-reader notes.
 
 ### Links that open in a new tab
 
@@ -99,7 +99,8 @@ style it with `licenses.css` (or `web-parts.css`, which imports it).
   packages, such as the project an app is adapted from), `atSource` (a notice found at a package's source, for one
   that ships none), `decisions` (why a package that isn't permissive may still ship), `page` (another path than
   `licenses/index.html`).
-- Put the plugin in `worker.plugins` too when a worker imports packages of its own.
+- When a worker imports packages of its own, give the workers' build the same plugin object, so both builds add to
+  one list: `const licenses = licensesPage({...})`, then `plugins: [licenses]` and `worker: {plugins: () => [licenses]}`.
 - **Another bundler**: pass its module paths (esbuild's metafile inputs, say) to `shippedPackages(ids, {buildFolder})`,
   then `refuseCopyleft` and `renderLicenses`.
 - Code linked by path from outside `node_modules` (a workspace package) is the app's own and isn't listed; this
@@ -145,7 +146,8 @@ writeFileSync('dist/licenses-list.html', renderLicenses(packages, extras));
   `LICENSES.chromium.html` beside the program.
 - **What stops it**, by name: a build's list missing (a build skipped or failed: each collector removes its old list
   when its build starts), a dependency that isn't installed, a package with no notice, a copyleft or unlicensed package
-  with no decision, and an Electron installed without its download's license files.
+  with no decision, and an Electron installed without its download's license files. A collector writes its list only
+  once its bundle is written, so a failed build leaves none.
 - **Trap: `lazy-val` 1.0.5, which `electron-updater` pulls in, ships no license file, and its repository has none
   either**, so the merge stops at it. Its package.json says MIT; pass the MIT terms, with its author named and where
   you found that, through `atSource: {'lazy-val': text}`. Any Electron app with `electron-updater` meets it.

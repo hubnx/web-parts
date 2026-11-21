@@ -44,7 +44,7 @@ export async function takePagePicture(leaveOut: Element): Promise<string | null>
       // A <noscript>'s words came out as text in the copy, as if the page had said them.
       filter: node => node !== leaveOut && node.nodeName !== 'NOSCRIPT',
       // What the page marks private (a line of your own text) keeps its place in the picture, blank. Called once, with
-      // the whole copy of the page (a check of the copy's top alone hid nothing: fresh review's fix, 2026-11-11).
+      // the whole copy of the page (a check of the copy's top alone hid nothing: a code review's fix, 2026-11-11).
       onCloneNode: copy => {
         if (copy.nodeType !== Node.ELEMENT_NODE) return;
         for (const element of (copy as Element).querySelectorAll<HTMLElement>('[data-private]')) element.style.visibility = 'hidden';

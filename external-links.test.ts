@@ -5,7 +5,7 @@ const Site = 'https://typing.hubnx.com';
 const run = (html: string) => openOutboundLinksInNewTab(html, Site);
 
 describe('links that open in a new tab', () => {
-  it('keeps a ">" inside an attribute value from breaking the tag (fresh review, 2026-11-01)', () => {
+  it('keeps a ">" inside an attribute value from breaking the tag (a code review, 2026-11-01)', () => {
     expect(run('<a href="https://x.com" title="a>b">X</a>')).toBe('<a href="https://x.com" title="a>b" target="_blank" rel="noopener">X<span class="visually-hidden"> (opens in a new tab)</span></a>');
   });
 

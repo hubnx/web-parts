@@ -3,7 +3,7 @@
 // out anything private, painted into the picture before it leaves the browser, beside the form
 // (feedback-form.ts). Only a picture the person has seen is sent, with the boxes drawn before Send: Send
 // pressed while it is still being taken sends the words alone, and the picture can't be drawn on while a
-// report goes (fresh review, 2026-11-05: an unseen picture went, and a box drawn during the send didn't).
+// report goes (a code review, 2026-11-05: an unseen picture went, and a box drawn during the send didn't).
 // A picture that can't be taken never holds a report back: the words are the report. Closed unsent, the
 // pop-up keeps the words for next time; each opening takes a fresh picture.
 
@@ -73,7 +73,7 @@ class ReportPopup {
     this.dialog.showModal();
     // Closed and opened again while its report is still going: the report stays as it is, locked, and the thanks
     // or the answer lands on it (a reopening once took a fresh picture and let new words be typed, which the
-    // thanks then hid: fresh review, 2026-11-11).
+    // thanks then hid: a code review, 2026-11-11).
     if (this.sending) return;
     this.setMarks([]);
     this.showPicture(null, 'Taking a picture of this page…');
