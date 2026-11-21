@@ -1,0 +1,48 @@
+{
+  "name": "@hubnx/web-parts",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Parts Hub Nexus's apps share: a build-time link rewriter, pop-ups, an email-link chooser, the feedback form, and open-source licenses builders for a website and an Electron app. TypeScript source, used through Vite.",
+  "license": "MIT",
+  "repository": "github:hubnx/web-parts",
+  "exports": {
+    "./external-links": "./external-links.ts",
+    "./html": "./html.ts",
+    "./popup": "./popup.ts",
+    "./email-chooser": "./email-chooser.ts",
+    "./mail-options": "./mail-options.ts",
+    "./feedback-report": "./feedback-report.ts",
+    "./feedback-form": "./feedback-form.ts",
+    "./feedback-link": "./feedback-link.ts",
+    "./licenses": "./licenses.ts",
+    "./electron-notices": "./electron-notices.ts",
+    "./web-parts.css": "./web-parts.css",
+    "./licenses.css": "./licenses.css"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "modern-screenshot": "4.7.0"
+  },
+  "peerDependenciesMeta": {
+    "modern-screenshot": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "modern-screenshot": "4.7.0",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.0.0",
+      "onFail": "download"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+/* The open-source licenses page's list (licenses.ts), on the app's colour tokens. Its own file, so an app with
+   its own styles for the other parts can load these alone. */
+.license-list { list-style: none; padding: 0; margin: 1.5em 0 0; display: grid; gap: 6px; }
+.license-list details { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.license-list summary { cursor: pointer; padding: 11px 14px; overflow-wrap: anywhere; }
+.license-list details > :not(summary) { margin: 0 14px 12px; }
+.license-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.45; max-height: 24em; overflow: auto; padding: 10px 12px; border-radius: 6px; background: var(--surface-2); }
